@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation App</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <!-- 使用 Google Fonts 作为字体 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <!-- 使用 Font Awesome 图标库 -->
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        <h1><i class="fas fa-language"></i> DOUKAS</h1>
+    </header>
+
+    <main>
+        <div class="translation-form">
+            <label for="textToTranslate">Enter Text to Translate:</label>
+            <input type="text" id="textToTranslate" placeholder="Type your text here...">
+            <label for="sourceLanguage">Source Language:</label>
+            <select id="sourceLanguage">
+                <!-- 这里可以动态添加支持的语言选项 -->
+                <option value="en">English</option>
+                <option value="zh">Chinese</option>
+                <!-- 添加更多语言选项... -->
+            </select>
+            <label for="targetLanguage">Target Language:</label>
+            <select id="targetLanguage">
+                <!-- 这里可以动态添加支持的语言选项 -->
+                <option value="el">Greek</option>
+                <!-- 添加更多语言选项... -->
+            </select>
+            <button onclick="translateText()"><i class="fas fa-language"></i> Translate</button>
+        </div>
+
+        <div class="translations">
+            <h2>Translations:</h2>
+            <ul id="translationsList">
+                {% for translation in translations %}
+                    <li>{{ translation.original_text }} ({{ translation.translated_text }})</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        function translateText() {
+            const textToTranslate = document.getElementById('textToTranslate').value;
+            const sourceLanguage = document.getElementById('sourceLanguage').value;
+            const targetLanguage = document.getElementById('targetLanguage').value;
+
+            fetch('/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: textToTranslate, source: sourceLanguage, target: targetLanguage }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Translated Text:', data.translated_text);
+                const translationsList = document.getElementById('translationsList');
+                const newTranslation = document.createElement('li');
+                newTranslation.textContent = `${textToTranslate} (${data.translated_text})`;
+                translationsList.appendChild(newTranslation);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+<script>
+    div.background;{
+        display:flex;
+        width:100;
+        height:100;
+
+    } 
+</script>
+</html>
