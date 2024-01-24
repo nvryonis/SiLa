@@ -17,13 +17,6 @@
             padding: 50px;
         }
 
-        canvas {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1; /* 将泡泡置于后面 */
-        }
 
         #clock {
             font-size: 2em;
@@ -54,9 +47,9 @@
             left: 50%;
             transform: translate(-50%, -50%);
             padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8); /* 背景颜色带透明度 */
+            background-color: rgba(255, 255, 255, 0.8);
             border-radius: 10px;
-            box-shadow: 0 0 10px rgb(15, 15, 15); /* 阴影效果 */
+            box-shadow: 0 0 10px rgb(15, 15, 15);
             text-align: center;
         }
     </style>
@@ -71,22 +64,18 @@
         function updateClockAndDate() {
             const now = new Date();
 
-            // 更新时间
             const hours = now.getHours().toString().padStart(2, '0');
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const timeString = `${hours}:${minutes}`;
             document.getElementById('clock').textContent = timeString;
 
-            // 更新日期
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateString = now.toLocaleDateString('el-GR', options);
             document.getElementById('date').textContent = dateString;
         }
 
-        // 初次加载页面时调用一次
         updateClockAndDate();
 
-        // 每秒更新一次
         setInterval(updateClockAndDate, 1000);
     </script>
 
@@ -139,7 +128,7 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    // 修复未定义的变量
+
                     if (data.error) {
                         document.getElementById('errorMessage').textContent = data.error;
                     } else {
