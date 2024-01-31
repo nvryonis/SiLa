@@ -1,10 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from google.cloud import translate_v2 as translate
-from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///translations.db'
-db = SQLAlchemy(app)
 
 class Translation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -24,17 +21,11 @@ def index():
 def translate_text():
     data = request.get_json()
     text = data.get('text')
-    target_language = 'el'  # 希腊语的 ISO 639-1 代码
+    target_language = 'el' 
 
-    # 使用 Google Translate API 进行翻译
     client = translate.Client()
     result = client.translate(text, target_language=target_language)
     translated_text = result['input']
-
-    # 保存翻译结果到数据库
-    translation = Translation(original_text=text, translated_text=translated_text, target_language=target_language)
-    db.session.add(translation)
-    db.session.commit()
 
     return jsonify({'translated_text': translated_text})
 
