@@ -8,6 +8,10 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" 
+    async defer></script>
+
     <style>
         body {
             margin: 0;
@@ -17,7 +21,10 @@
             padding: 50px;
         }
 
-
+        main {
+            margin: 50px;
+        }
+        
         #clock {
             font-size: 2em;
             margin-bottom: 20px;
@@ -41,16 +48,9 @@
             background-color: rgba(255, 255, 255, 0.8);
         }
 
-        #questionPanel {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgb(15, 15, 15);
-            text-align: center;
+        #errorMessage {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -80,68 +80,102 @@
     </script>
 
     <main>
-        <div id="questionPanel" class="translation-form">
-            <label for="textToTranslate">Enter Text to Translate:</label>
-            <input type="text" id="textToTranslate" placeholder="Type your text here...">
-
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h2>input</h2>
+                    <textarea id="inputTextarea" class="form-control" placeholder="在这里输入文字"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <h2>output</h2>
+                    <textarea id="outputTextarea" class="form-control" readonly></textarea>
+                </div>
+            </div>
             <br>
+            <button class="btn btn-primary" onclick="translateText()">translate</button>
+            <div id="errorMessage"></div>
 
-            <label for="sourceLanguage">Source Language:</label>
-            <select id="sourceLanguage">
-                <!-- language choices -->
-                <option value="el">Greek</option>
-                <option value="zh">Chinese</option>
-            </select>
 
-            <br>
 
-            <label for="targetLanguage">Target Language:</label>
-            <select id="targetLanguage">
-                <!-- language choices -->
-                <option value="el">Greek</option>
-                <option value="zh">Chinese</option>
-            </select>
-            <button onclick="translateText()"><i class="fas fa-language"></i> Translate</button>
-        </div>
+        <div id="map" style="height: 400px;"></div>
 
-        <div class="translations">
-            <h2>Translations:</h2>
-            <ul id="translationsList"></ul>
-        </div>
     </main>
 
     <form onsubmit="translateText(); return false;"></form>
 
-        <script>
-
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@google-cloud/translate"></script>
+    <script>
         function translateText() {
-            const textToTranslate = document.getElementById('textToTranslate').value;
-            const sourceLanguage = document.getElementById('sourceLanguage').value;
-            const targetLanguage = document.getElementById('targetLanguage').value;
-
-            fetch('/translate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ text: textToTranslate, source: sourceLanguage, target: targetLanguage }),
-            })
-                .then(response => response.json())
-                .then(data => {
-
-                    if (data.error) {
-                        document.getElementById('errorMessage').textContent = data.error;
-                    } else {
-                        console.log('Translated Text:', data.translated_text);
-                        const translationsList = document.getElementById('translationsList');
-                        const newTranslation = document.createElement('li');
-                        newTranslation.textContent = `${textToTranslate} (${data.translated_text})`;
-                        translationsList.appendChild(newTranslation);
-                    }
-                })
-                .catch(error => console.error('Error:', error));
+            const inputText = document.getElementById('inputTextarea').value;
+    
+            googleTranslate.detectLanguage(inputText, (err, detection) => {
+                if (!err) {
+                    const sourceLanguage = detection.language;
+                    const targetLanguage = sourceLanguage === 'zh-CN' ? 'el' : 'zh-CN';
+    
+                    googleTranslate.translate(inputText, sourceLanguage, targetLanguage, (err, translation) => {
+                        if (!err) {
+                            document.getElementById('outputTextarea').value = translation.translatedText;
+                        } else {
+                            console.error('翻译失败：', err);
+                        }
+                    });
+                } else {
+                    console.error('语言检测失败：', err);
+                }
+            });
         }
     </script>
+
+    <script>
+    if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+    alert("Geolocation is not supported by this browser.");
+    }
+
+    function showPosition(position) {
+    var userLatitude = position.coords.latitude;
+    var userLongitude = position.coords.longitude;
+
+
+    updateMap(userLatitude, userLongitude);
+    }
+
+    function updateMap(latitude, longitude) {
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: latitude, lng: longitude },
+        zoom: 15
+    });
+
+    var marker = new google.maps.Marker({
+        position: { lat: latitude, lng: longitude },
+        map: map,
+        title: 'Your Location'
+    });
+    }
+
+    window.onload = function() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+    };
+
+
+    document.getElementById('updateLocationButton').onclick = function() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+    };
+
+    </script>
+
 </body>
 
 </html>
