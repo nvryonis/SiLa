@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,173 +10,293 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" 
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"  -->
     async defer></script>
 
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-            padding: 50px;
-        }
-
-        main {
-            margin: 50px;
-        }
-        
-        #clock {
-            font-size: 2em;
-            margin-bottom: 20px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-
-        #date {
-            font-size: 1.5em;
-            position: absolute;
-            top: 60px;
-            right: 10px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-
-        #errorMessage {
-            color: red;
-            margin-top: 10px;
-        }
-    </style>
 </head>
 
+
+
 <body>
+    <div class="pagination">
+        <button onclick="showPage(1)">calendar</button>
+        <button onclick="showPage(2)">translate</button>
+        <button onclick="showPage(3)">map</button>
+        <button onclick="showPage(4)">about us</button>
+        <!-- <button onclick="showPage(x)">...</button> -->
+    </div>
 
-    <div id="clock"></div>
-    <div id="date"></div>
 
-    <script>
-        function updateClockAndDate() {
-            const now = new Date();
+    <div id="page1" class="page-content">
 
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const timeString = `${hours}:${minutes}`;
-            document.getElementById('clock').textContent = timeString;
 
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const dateString = now.toLocaleDateString('el-GR', options);
-            document.getElementById('date').textContent = dateString;
-        }
+        <div id="clock"></div>
 
-        updateClockAndDate();
 
-        setInterval(updateClockAndDate, 1000);
-    </script>
+        <div id="date"></div>
+    
+        
 
-    <main>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h2>input</h2>
-                    <textarea id="inputTextarea" class="form-control" placeholder="在这里输入文字"></textarea>
+
+        <script>
+            function updateClockAndDate() {
+                const now = new Date();
+    
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const timeString = `${hours}:${minutes}`;
+                document.getElementById('clock').textContent = timeString;
+    
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateString = now.toLocaleDateString('el-GR', options);
+                document.getElementById('date').textContent = dateString;
+            }
+    
+            updateClockAndDate();
+    
+            setInterval(updateClockAndDate, 1000);
+        </script>
+
+        <div id="calendar"></div>
+
+        <!-- <iframe src="///" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe> -->
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+              initialView: 'dayGridMonth',
+              events: getEvents()
+            });
+      
+            calendar.render();
+
+            setInterval(function() {
+              calendar.removeAllEvents();
+              calendar.addEventSource(getEvents());
+            }, 60000);
+      
+            function getEvents() {
+              var now = new Date();
+              var year = now.getFullYear();
+              var month = now.getMonth() + 1;
+              var day = now.getDate();
+      
+              return [
+                {
+                  title: 'Today',
+                  start: year + '-' + month + '-' + day
+                }
+              ];
+            }
+          });
+        </script>
+
+    </div>
+
+
+    <div id="page2" class="page-content" style="display:none;">
+        <main>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2>input</h2>
+                        <textarea id="inputTextarea" class="form-control" placeholder="tap here"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <h2>output</h2>
+                        <textarea id="outputTextarea" class="form-control" readonly></textarea>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h2>output</h2>
-                    <textarea id="outputTextarea" class="form-control" readonly></textarea>
-                </div>
-            </div>
-            <br>
-            <button class="btn btn-primary" onclick="translateText()">translate</button>
-            <div id="errorMessage"></div>
+                <br>
+                <button class="btn btn-primary" onclick="translateText()">translate</button>
+                <div id="errorMessage"></div>
+
+    
+        </main>
+    
+        <form onsubmit="translateText(); return false;"></form>
+    
+        
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <!-- <script src="///"></script> -->
+        <script>
+            function translateText() {
+                const inputText = document.getElementById('inputTextarea').value;
+        
+                googleTranslate.detectLanguage(inputText, (err, detection) => {
+                    if (!err) {
+                        const sourceLanguage = detection.language;
+                        const targetLanguage = sourceLanguage === 'zh-CN' ? 'el' : 'zh-CN';
+        
+                        googleTranslate.translate(inputText, sourceLanguage, targetLanguage, (err, translation) => {
+                            if (!err) {
+                                document.getElementById('outputTextarea').value = translation.translatedText;
+                            } else {
+                                console.error('error：', err);
+                            }
+                        });
+                    } else {
+                        console.error('error：', err);
+                    }
+                });
+            }
+        </script>
 
 
+    </div>
 
+    <div id="page3" class="page-content" style="display:none;">
+
+    
         <div id="map" style="height: 400px;"></div>
 
-    </main>
 
-    <form onsubmit="translateText(); return false;"></form>
-
-    
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@google-cloud/translate"></script>
-    <script>
-        function translateText() {
-            const inputText = document.getElementById('inputTextarea').value;
-    
-            googleTranslate.detectLanguage(inputText, (err, detection) => {
-                if (!err) {
-                    const sourceLanguage = detection.language;
-                    const targetLanguage = sourceLanguage === 'zh-CN' ? 'el' : 'zh-CN';
-    
-                    googleTranslate.translate(inputText, sourceLanguage, targetLanguage, (err, translation) => {
-                        if (!err) {
-                            document.getElementById('outputTextarea').value = translation.translatedText;
-                        } else {
-                            console.error('翻译失败：', err);
-                        }
-                    });
-                } else {
-                    console.error('语言检测失败：', err);
-                }
+        <script>
+            if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+            alert("Geolocation is not supported by this browser.");
+            }
+        
+            function showPosition(position) {
+            var userLatitude = position.coords.latitude;
+            var userLongitude = position.coords.longitude;
+        
+        
+            updateMap(userLatitude, userLongitude);
+            }
+        
+            function updateMap(latitude, longitude) {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: latitude, lng: longitude },
+                zoom: 15
             });
-        }
-    </script>
+        
+            var marker = new google.maps.Marker({
+                position: { lat: latitude, lng: longitude },
+                map: map,
+                title: 'Your Location'
+            });
+            }
+        
+            window.onload = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+            };
+        
+        
+            document.getElementById('updateLocationButton').onclick = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+            };
+        
+            </script>
+    </div>
+    
+    <div id="page4" class="page-content" style="display:none;"></div>
+    
+    <!-- <div id="pagex" class="page-content" style="display:none;"> -->
+
 
     <script>
-    if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition);
-    } else {
-    alert("Geolocation is not supported by this browser.");
+        
+    function showPage(pageNumber) {
+    // Hide all pages
+    var pages = document.querySelectorAll('.page-content');
+    for (var i = 0; i < pages.length; i++) {
+        pages[i].style.display = 'none';
     }
 
-    function showPosition(position) {
-    var userLatitude = position.coords.latitude;
-    var userLongitude = position.coords.longitude;
-
-
-    updateMap(userLatitude, userLongitude);
+    // Show the selected page
+    var pageId = 'page' + pageNumber;
+    var selectedPage = document.getElementById(pageId);
+    if (selectedPage) {
+        selectedPage.style.display = 'block';
     }
-
-    function updateMap(latitude, longitude) {
-    var map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: latitude, lng: longitude },
-        zoom: 15
-    });
-
-    var marker = new google.maps.Marker({
-        position: { lat: latitude, lng: longitude },
-        map: map,
-        title: 'Your Location'
-    });
     }
-
-    window.onload = function() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    } else {
-        alert("Geolocation is not supported by this browser.");
-    }
-    };
-
-
-    document.getElementById('updateLocationButton').onclick = function() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
-    } else {
-        alert("Geolocation is not supported by this browser.");
-    }
-    };
 
     </script>
-
 </body>
 
 </html>
+
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        font-family: 'Arial', sans-serif;
+        text-align: center;
+        padding: 50px;
+    }
+
+    main {
+        margin: 50px;
+    }
+    
+    #clock {
+        font-size: 2em;
+        margin-bottom: 20px;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    #date {
+        font-size: 1.5em;
+        position: absolute;
+        top: 60px;
+        right: 10px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    #errorMessage {
+        color: red;
+        margin-top: 10px;
+    }
+
+    .page-content {
+        display: block;
+        margin-top: 20px;
+    }
+
+    .pagination button {
+        cursor: pointer;
+        margin-right: 10px;
+    }
+
+    button {
+        color: white;
+        padding: 5px 20px;
+        border: 2px solid #0080ff;
+        background: linear-gradient(to right, #0080ff,#0080ff);
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #004890;
+    }
+
+    button:active {
+        background-color: #0080ff;
+        box-shadow: 0 5px #666;
+        transform: translateY(4px);
+    }
+
+
+</style>
